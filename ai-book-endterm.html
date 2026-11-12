@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Fundamentals: Intelligent Greenhouses of Astana</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--background, #1a1a2e);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ── Book Container ── */
+    .book-scene {
+      perspective: 1800px;
+      width: 900px;
+      height: 600px;
+      position: relative;
+    }
+
+    .book {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    /* ── Each leaf (front + back) ── */
+    .page {
+      position: absolute;
+      width: 50%;
+      height: 100%;
+      right: 0;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+      z-index: 1;
+      cursor: pointer;
+    }
+
+    .page.flipped {
+      transform: rotateY(-180deg);
+    }
+
+    .page-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      overflow: hidden;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .page-front {
+      background: #faf8f5;
+      z-index: 2;
+      box-shadow: inset -4px 0 12px rgba(0,0,0,0.08), 2px 0 8px rgba(0,0,0,0.1);
+    }
+
+    .page-back {
+      background: #faf8f5;
+      transform: rotateY(180deg);
+      border-radius: 8px 0 0 8px;
+      box-shadow: inset 4px 0 12px rgba(0,0,0,0.08), -2px 0 8px rgba(0,0,0,0.1);
+    }
+
+    /* ── Static back cover (left side) ── */
+    .back-cover {
+      position: absolute;
+      width: 50%;
+      height: 100%;
+      left: 0;
+      background: linear-gradient(135deg, #1e3a2f 0%, #0f2318 100%);
+      border-radius: 8px 0 0 8px;
+      box-shadow: inset 4px 0 15px rgba(0,0,0,0.3);
+      z-index: 0;
+    }
+
+    /* ── Front hard cover ── */
+    .hard-cover-front {
+      background: linear-gradient(135deg, #1a5c3a 0%, #0d3320 60%, #0a2a18 100%);
+      border-radius: 0 8px 8px 0;
+      box-shadow: inset -3px 0 10px rgba(0,0,0,0.4), 3px 0 15px rgba(0,0,0,0.3);
+    }
+
+    .hard-cover-back-face {
+      background: #f5f0e8;
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* ── Page content styling ── */
+    .page-content {
+      padding: 32px 28px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #d4c9b8 transparent;
+    }
+
+    .page-content::-webkit-scrollbar { width: 4px; }
+    .page-content::-webkit-scrollbar-thumb { background: #c9b99a; border-radius: 2px; }
+    .page-content::-webkit-scrollbar-track { background: transparent; }
+
+    .page-content h2 {
+      font-family: 'Merriweather', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a2e1a;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .page-content .chapter-label {
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #6b8f71;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .page-content .topic-label {
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #9aaa8e;
+      float: right;
+    }
+
+    .page-content p {
+      font-family: 'Merriweather', serif;
+      font-size: 12px;
+      line-height: 1.75;
+      color: #3a3a3a;
+      margin-bottom: 10px;
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .page-content ul {
+      margin: 6px 0 10px 16px;
+      font-family: 'Merriweather', serif;
+      font-size: 12px;
+      line-height: 1.7;
+      color: #3a3a3a;
+    }
+
+    .page-content ul li { margin-bottom: 3px; }
+
+    .page-content .note-box {
+      background: #eef5ee;
+      border-left: 3px solid #4a8c5c;
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #2a5a3a;
+      line-height: 1.5;
+    }
+
+    .page-content .formula-box {
+      background: #1a2e1a;
+      color: #6fcf97;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 14px;
+      letter-spacing: 1px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .page-content .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin: 8px 0;
+    }
+
+    .page-content .info-card {
+      background: #fff;
+      border: 1px solid #e0ddd5;
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+
+    .page-content .info-card h4 {
+      font-family: 'Merriweather', serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #1a2e1a;
+      margin-bottom: 2px;
+    }
+
+    .page-content .info-card p {
+      font-size: 10.5px;
+      line-height: 1.4;
+      margin: 0;
+      text-align: left;
+    }
+
+    .page-content .mdp-box {
+      background: #fff;
+      border: 1px solid #e0ddd5;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin: 8px 0;
+    }
+
+    .page-content .mdp-box .desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      color: #666;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    /* Page number at bottom */
+    .page-number {
+      font-family: 'Merriweather', serif;
+      font-size: 10.5px;
+      color: #aaa;
+      text-align: center;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid #e8e4dc;
+    }
+
+    /* ── Cover design ── */
+    .cover-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 30px;
+      text-align: center;
+      color: #d4e8d4;
+      position: relative;
+    }
+
+    .cover-content::before {
+      content: '';
+      position: absolute;
+      top: 20px; left: 20px; right: 20px; bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .cover-content .badge {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: #6fcf97;
+      border: 1px solid rgba(111,207,151,0.3);
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      background: rgba(111,207,151,0.08);
+    }
+
+    .cover-content h1 {
+      font-family: 'Merriweather', serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 14px;
+    }
+
+    .cover-content .subtitle {
+      font-size: 12px;
+      color: #a0c4a0;
+      line-height: 1.5;
+      max-width: 320px;
+      margin-bottom: 28px;
+    }
+
+    .cover-content .authors {
+      font-size: 11px;
+      color: #7aa87a;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 16px;
+    }
+
+    /* ── Spine shadow ── */
+    .spine-shadow {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 30px;
+      height: 100%;
+      transform: translateX(-50%);
+      background: linear-gradient(to right,
+        rgba(0,0,0,0.15) 0%,
+        rgba(0,0,0,0.05) 30%,
+        rgba(0,0,0,0) 50%,
+        rgba(0,0,0,0.05) 70%,
+        rgba(0,0,0,0.15) 100%
+      );
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 28px;
+      z-index: 100;
+    }
+
+    .controls button {
+      background: var(--card, #2a2a4a);
+      color: var(--foreground, #e0e0e0);
+      border: 1px solid var(--border, #3a3a5a);
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .controls button:hover:not(:disabled) {
+      background: var(--accent, #3a3a6a);
+      transform: translateY(-1px);
+    }
+
+    .controls button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .page-indicator {
+      font-size: 13px;
+      color: var(--muted-foreground, #999);
+      font-weight: 500;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    /* ── Table of Contents on the inner cover ── */
+    .toc-content {
+      padding: 26px 24px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toc-content h3 {
+      font-family: 'Merriweather', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a2e1a;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #4a8c5c;
+    }
+
+    .toc-content .toc-item {
+      display: flex;
+      align-items: baseline;
+      padding: 3px 0;
+      font-size: 11px;
+      color: #555;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .toc-content .toc-item:hover { color: #1a5c3a; }
+
+    .toc-content .toc-num {
+      font-weight: 600;
+      color: #4a8c5c;
+      min-width: 24px;
+    }
+
+    .toc-content .toc-title { flex: 1; }
+
+    .toc-content .toc-dots {
+      flex: 1;
+      border-bottom: 1px dotted #ccc;
+      margin: 0 4px;
+      min-width: 15px;
+    }
+
+    .toc-content .toc-page {
+      font-weight: 500;
+      color: #888;
+      min-width: 18px;
+      text-align: right;
+    }
+
+    /* Book edge texture */
+    .book-edge-top, .book-edge-bottom {
+      position: absolute;
+      left: 0; right: 0;
+      height: 3px;
+      z-index: 998;
+      pointer-events: none;
+    }
+    .book-edge-top {
+      top: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent);
+    }
+    .book-edge-bottom {
+      bottom: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
+    }
+
+    /* ── Paper texture overlay ── */
+    .paper-texture {
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      border-radius: inherit;
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased">
+
+  <!-- Title bar -->
+  <div style="margin-bottom: 20px; text-align: center;">
+    <span style="font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted-foreground, #888); font-weight: 600;">AI Fundamentals</span>
+    <h1 style="font-family: 'Merriweather', serif; font-size: 20px; font-weight: 700; color: var(--foreground, #fff); margin-top: 4px;">The Intelligent Greenhouses of Astana</h1>
+  </div>
+
+  <div class="book-scene">
+    <div class="book" id="book">
+      <!-- Back cover (always visible on left) -->
+      <div class="back-cover">
+        <div class="paper-texture"></div>
+      </div>
+
+      <div class="spine-shadow"></div>
+      <div class="book-edge-top"></div>
+      <div class="book-edge-bottom"></div>
+
+      <!-- Pages will be injected by JS -->
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn" disabled onclick="prevPage()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Previous
+    </button>
+    <div class="page-indicator" id="pageIndicator">Cover</div>
+    <button id="nextBtn" onclick="nextPage()">
+      Next
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <script>
+    // ── Page Data (Fully in English - Left & Right Pages) ──
+    const pagesData = [
+      // Page 0: Cover (front)
+      {
+        front: `<div class="hard-cover-front page-face">
+          <div class="cover-content">
+            <div class="badge">End-Term Assignment</div>
+            <h1>The Intelligent Greenhouses of Astana</h1>
+            <div class="subtitle">A Journey Through AI: From Reflex Agents to Markov Decision Processes</div>
+            <div class="authors"><strong>Project authors:</strong> Arsen Nagmet, Daryn Bolatov</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face hard-cover-back-face">
+          <div class="toc-content">
+            <h3>📖 Table of Contents</h3>
+            <div class="toc-item" onclick="goToPage(1)"><span class="toc-num">1.</span><span class="toc-title">Frozen Horizon</span><span class="toc-dots"></span><span class="toc-page">2</span></div>
+            <div class="toc-item" onclick="goToPage(2)"><span class="toc-num">2.</span><span class="toc-title">Simple Reflex Agent</span><span class="toc-dots"></span><span class="toc-page">4</span></div>
+            <div class="toc-item" onclick="goToPage(3)"><span class="toc-num">3.</span><span class="toc-title">PEAS & Environment</span><span class="toc-dots"></span><span class="toc-page">6</span></div>
+            <div class="toc-item" onclick="goToPage(4)"><span class="toc-num">4.</span><span class="toc-title">Uninformed Search (BFS)</span><span class="toc-dots"></span><span class="toc-page">8</span></div>
+            <div class="toc-item" onclick="goToPage(5)"><span class="toc-num">5.</span><span class="toc-title">DFS & Memory Trade-offs</span><span class="toc-dots"></span><span class="toc-page">10</span></div>
+            <div class="toc-item" onclick="goToPage(6)"><span class="toc-num">6.</span><span class="toc-title">Uniform Cost Search</span><span class="toc-dots"></span><span class="toc-page">12</span></div>
+            <div class="toc-item" onclick="goToPage(7)"><span class="toc-num">7.</span><span class="toc-title">Informed Search: A*</span><span class="toc-dots"></span><span class="toc-page">14</span></div>
+            <div class="toc-item" onclick="goToPage(8)"><span class="toc-num">8.</span><span class="toc-title">Local Search & Hill Climbing</span><span class="toc-dots"></span><span class="toc-page">16</span></div>
+            <div class="toc-item" onclick="goToPage(9)"><span class="toc-num">9.</span><span class="toc-title">Simulated Annealing</span><span class="toc-dots"></span><span class="toc-page">18</span></div>
+            <div class="toc-item" onclick="goToPage(10)"><span class="toc-num">10.</span><span class="toc-title">Genetic Algorithms</span><span class="toc-dots"></span><span class="toc-page">20</span></div>
+            <div class="toc-item" onclick="goToPage(11)"><span class="toc-num">11.</span><span class="toc-title">Adversarial Search & Minimax</span><span class="toc-dots"></span><span class="toc-page">22</span></div>
+            <div class="toc-item" onclick="goToPage(12)"><span class="toc-num">12.</span><span class="toc-title">Alpha-Beta Pruning</span><span class="toc-dots"></span><span class="toc-page">24</span></div>
+            <div class="toc-item" onclick="goToPage(13)"><span class="toc-num">13.</span><span class="toc-title">Markov Decision Processes</span><span class="toc-dots"></span><span class="toc-page">26</span></div>
+            <div class="toc-item" onclick="goToPage(14)"><span class="toc-num">14.</span><span class="toc-title">Value Iteration & Bellman</span><span class="toc-dots"></span><span class="toc-page">28</span></div>
+            <div class="toc-item" onclick="goToPage(15)"><span class="toc-num">15.</span><span class="toc-title">RL & Hidden Markov Models</span><span class="toc-dots"></span><span class="toc-page">30</span></div>
+          </div>
+        </div>`
+      },
+      // Page 1: Ch.1 Introduction
+      {
+        front: `<div class="page-face page-front">
+          <div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 1 of 15</span>
+            <span class="topic-label">Introduction</span>
+            <h2>The Frozen Horizon</h2>
+            <p>The winter wind howled across the snow-covered steppes surrounding Astana, Kazakhstan, sweeping past the monumental futuristic towers of the city. Outside, temperatures routinely plummeted far below freezing. Yet, inside a sprawling state-of-the-art agricultural complex, rows of lush green crops thrived under warm LED lights.</p>
+            <p>This modern miracle was not maintained entirely by human hands. It was the domain of autonomous artificial intelligence systems designed to protect fragile life against a harsh, stochastic environment. In this book, we explore the core paradigms of AI—from simple reflex agents to complex decision-theoretic planning—using the lifeblood of this greenhouse as our guiding narrative.</p>
+            <div class="note-box">💡 <strong>Context:</strong> Astana's harsh climatic environment serves as an ideal testing ground for demonstrating the need for adaptive artificial intelligence algorithms.</div>
+            <div class="page-number">— 2 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Prelude</span>
+            <h2>Climatic Context</h2>
+            <p>Astana's geographical location dictates extreme conditions for agricultural production. The sharply continental climate requires automation systems to provide proactive microclimate control rather than static maintenance.</p>
+            <p>Throughout this book, we sequentially examine how artificial intelligence algorithms evolve: from simple reactive rules to complex stochastic decision-making models operating under deep uncertainty.</p>
+            <div class="note-box">📌 <strong>Project Objective:</strong> Demonstrate practical applications of AI theoretical models using an autonomous agricultural complex as a case study.</div>
+            <div class="page-number">— 1 —</div>
+          </div>
+        </div>`
+      },
+      // Page 2: Ch.2 Simple Reflex Agent
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 2 of 15</span>
+            <span class="topic-label">Reflection system</span>
+            <h2>The Simple Reflex Agent</h2>
+            <p>Our story begins with a humble guardian: a simple reflex agent embedded in the environmental control box of Sector 1. Unlike advanced planning systems, a reflex agent operates on a strict, instantaneous loop: <strong>PERCEIVE → DECIDE → ACT</strong>.</p>
+            <ul>
+              <li><strong>Sensors:</strong> Continuously measure temperature, humidity, and soil moisture.</li>
+              <li><strong>Condition-Action Rules:</strong> Maps current sensor readings directly to physical interventions without maintaining a history or looking ahead.</li>
+            </ul>
+            <p>When the temperature sensor inside Sector 1 dropped to 17°C, the agent didn't ponder the historical weather patterns of Kazakhstan; it evaluated its rules and immediately executed <code style="background:#eef5ee; padding:2px 6px; border-radius:4px; font-size:11px;">TURN_HEATER_ON</code>. One percept led directly to one decision, ensuring rapid survival reflexes.</p>
+            <div class="page-number">— 4 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Architecture</span>
+            <h2>Reflexes and Rules</h2>
+            <p>A simple reflex agent selects actions based on the current percept, ignoring the history of environmental states. Its logic is governed strictly by Condition-Action rules.</p>
+            <ul>
+              <li><strong>Rule Priority:</strong> Evaluation order is critical during conflicting triggers (e.g., simultaneous temperature drops and soil dryness).</li>
+              <li><strong>Execution Speed:</strong> Instantaneous reaction to emergency environmental fluctuations.</li>
+            </ul>
+            <div class="note-box">⚙️ Limitation: The agent remains blind to long-term consequences of its actions due to a total lack of internal memory regarding past states.</div>
+            <div class="page-number">— 3 —</div>
+          </div>
+        </div>`
+      },
+      // Page 3: Ch.3 PEAS
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 3 of 15</span>
+            <span class="topic-label">Environment modeling</span>
+            <h2>PEAS and Environmental Classification</h2>
+            <p>To formally engineer our greenhouse caretaker, we define its operational scope using the <strong>PEAS</strong> framework:</p>
+            <div class="info-grid">
+              <div class="info-card"><h4>Performance</h4><p>Maintain healthy crop conditions while minimizing water and energy waste.</p></div>
+              <div class="info-card"><h4>Environment</h4><p>Greenhouse air, soil beds, water reservoirs, and heating/ventilation equipment.</p></div>
+              <div class="info-card"><h4>Actuators</h4><p>Heaters, exhaust fans, ventilation windows, and irrigation valves.</p></div>
+              <div class="info-card"><h4>Sensors</h4><p>Temperature, humidity, and soil-moisture detectors.</p></div>
+            </div>
+            <p>Furthermore, the greenhouse environment is classified as <strong>partially observable</strong>, <strong>stochastic</strong>, and <strong>dynamic</strong>.</p>
+            <div class="page-number">— 6 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Formalization</span>
+            <h2>Greenhouse Environment Analysis</h2>
+            <p>Rigorous agent engineering requires an explicit classification of the operating environment's properties:</p>
+            <ul>
+              <li><strong>Partially Observable:</strong> Sensors measure parameters locally without covering every square centimeter of vegetation.</li>
+              <li><strong>Stochastic:</strong> External weather patterns in Astana introduce unpredictable random disturbances.</li>
+              <li><strong>Dynamic:</strong> Environmental states evolve continuously over time independently of the agent's actions.</li>
+            </ul>
+            <div class="page-number">— 5 —</div>
+          </div>
+        </div>`
+      },
+      // Page 4: Ch.4 BFS
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 4 of 15</span>
+            <span class="topic-label">State-space search</span>
+            <h2>Uninformed Search — Navigating the City Map</h2>
+            <p>While reflex agents handle local loops, an intelligent transport drone must navigate shipments across Kazakhstan—for instance, finding a route from Astana to Almaty.</p>
+            <p>In uninformed search problems, the agent models a state space (cities), a start state (Astana), a goal test (<code style="background:#eef5ee; padding:2px 6px; border-radius:4px; font-size:11px;">state == Almaty</code>), and a successor function (roads with distance costs). Using <strong>Breadth-First Search (BFS)</strong>, the drone explores the state space level by level using a FIFO queue. BFS guarantees the shortest path measured in the number of edges, though it ignores varying road lengths.</p>
+            <div class="page-number">— 8 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Pathfinding</span>
+            <h2>Breadth-First Search (BFS)</h2>
+            <p>When a logistical drone delivers seeds or nutrients across cities in Kazakhstan, finding the shortest path across graph nodes becomes crucial.</p>
+            <ul>
+              <li><strong>Data Structure:</strong> Queue (FIFO - First In, First Out).</li>
+              <li><strong>Completeness:</strong> Guaranteed to find a solution if one exists and the branching factor is finite.</li>
+              <li><strong>Optimality:</strong> Finds the path with the fewest edges.</li>
+            </ul>
+            <div class="page-number">— 7 —</div>
+          </div>
+        </div>`
+      },
+      // Page 5: Ch.5 DFS
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 5 of 15</span>
+            <span class="topic-label">Search algorithms</span>
+            <h2>Depth-First Search and Memory Trade-offs</h2>
+            <p>Alternatively, <strong>Depth-First Search (DFS)</strong> explores a single branch as deeply as possible before backtracking, utilizing a LIFO stack.</p>
+            <p>In vast search spaces where memory is severely constrained, DFS can slip through narrow branches with a minimal memory footprint <em>O(b·m)</em>. However, unlike BFS, DFS offers no guarantee of finding the shortest or optimal path. When transporting fragile biological samples across complex routing trees, choosing between BFS's breadth and DFS's depth depends entirely on memory availability and path guarantees.</p>
+            <div class="page-number">— 10 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Memory Optimization</span>
+            <h2>Depth-First Search (DFS)</h2>
+            <p>Unlike BFS, depth-first search utilizes a stack (LIFO), drastically reducing memory consumption when traversing deep state-space trees.</p>
+            <ul>
+              <li><strong>Memory Complexity:</strong> <em>O(bm)</em> instead of BFS's exponential <em>O(b^m)</em>.</li>
+              <li><strong>Risks:</strong> Prone to infinite loops on cyclic graphs if visited states are not tracked.</li>
+            </ul>
+            <div class="note-box">⚠️ DFS does not guarantee finding the shortest path, potentially plunging into dead-end graph branches.</div>
+            <div class="page-number">— 9 —</div>
+          </div>
+        </div>`
+      },
+      // Page 6: Ch.6 UCS
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 6 of 15</span>
+            <span class="topic-label">Cost optimization</span>
+            <h2>Cost-Sensitive Search — Uniform Cost Search</h2>
+            <p>When road distances and fuel costs vary significantly across the Kazakh steppe, BFS and DFS fall short. A route via Karaganda and Balkhash might have a very different cost than an eastern path through Pavlodar and Semey.</p>
+            <p><strong>Uniform Cost Search (UCS)</strong> solves this by prioritizing the frontier node with the lowest cumulative path cost, <em>g(n)</em>, using a priority queue (min-heap). Provided edge costs are non-negative, UCS is both complete and optimal, always expanding the cheapest accumulated path first.</p>
+            <div class="page-number">— 12 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Weighted Graphs</span>
+            <h2>Uniform Cost Search (UCS)</h2>
+            <p>Real-world roads feature varying distances and fuel burn rates. While BFS treats all steps equally, UCS accounts for actual edge weights.</p>
+            <ul>
+              <li><strong>Priority Queue:</strong> Sorts nodes by accumulated path cost <em>g(n)</em>.</li>
+              <li><strong>Optimality:</strong> Always guarantees the discovery of the path with minimum total cost.</li>
+            </ul>
+            <div class="page-number">— 11 —</div>
+          </div>
+        </div>`
+      },
+      // Page 7: Ch.7 A*
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 7 of 15</span>
+            <span class="topic-label">Heuristic search</span>
+            <h2>Informed Search — The Power of A*</h2>
+            <p>To accelerate navigation without exhaustively expanding every low-cost node, the drone upgrades to <strong>A* Search</strong>. A* combines past actual cost <em>g(n)</em> with an estimated future heuristic <em>h(n)</em> representing the straight-line distance to the goal:</p>
+            <div class="formula-box">f(n) = g(n) + h(n)</div>
+            <p>By ordering the frontier by total estimated cost <em>f(n)</em>, A* acts like UCS guided by a reliable compass. For A* to maintain mathematical optimality, the heuristic must be admissible—meaning it never overestimates the true remaining cost.</p>
+            <div class="page-number">— 14 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Heuristics</span>
+            <h2>A* Heuristic Search</h2>
+            <p>The heuristic function <em>h(n)</em> injects "intuition" into blind search by estimating straight-line Euclidean distance to the goal.</p>
+            <ul>
+              <li><strong>Admissibility:</strong> The heuristic must never overestimate the true remaining cost to reach the goal.</li>
+              <li><strong>Efficiency:</strong> Significantly reduces the number of expanded nodes compared to UCS.</li>
+            </ul>
+            <div class="page-number">— 13 —</div>
+          </div>
+        </div>`
+      },
+      // Page 8: Ch.8 Hill Climbing
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 8 of 15</span>
+            <span class="topic-label">Local search</span>
+            <h2>Local Search — Optimizing Configuration Spaces</h2>
+            <p>Sometimes, the path taken to reach a solution is completely irrelevant; only the final configuration matters. Consider placing three backup environmental sensors across the greenhouse to minimize total network interference.</p>
+            <p><strong>Hill Climbing</strong> starts from a random configuration, evaluates its neighbors, and greedily moves to any adjacent state that improves the objective function. While fast and memory-efficient, simple hill climbing suffers from major structural traps: <strong>local maxima</strong>, <strong>plateaus</strong>, and <strong>ridges</strong>.</p>
+            <div class="page-number">— 16 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Optimization</span>
+            <h2>Local Search & Hill Climbing</h2>
+            <p>In equipment configuration problems, the path taken is irrelevant; only the optimal final parameter setup matters.</p>
+            <ul>
+              <li><strong>Greedy Movement:</strong> Transitions only to neighboring states that improve the objective evaluation function.</li>
+              <li><strong>Algorithmic Traps:</strong> Local maxima, flat plateaus, and sharp ridges that stall progress.</li>
+            </ul>
+            <div class="page-number">— 15 —</div>
+          </div>
+        </div>`
+      },
+      // Page 9: Ch.9 Simulated Annealing
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 9 of 15</span>
+            <span class="topic-label">Simulated annealing</span>
+            <h2>Escaping Local Traps — Simulated Annealing</h2>
+            <p>To prevent the greenhouse optimization algorithm from freezing at a suboptimal local peak, engineers deploy <strong>Simulated Annealing</strong>.</p>
+            <p>Modeled after metallurgical annealing, this algorithm occasionally accepts worse neighboring states with a probability determined by temperature <em>T</em>:</p>
+            <div class="formula-box">P(accept worse) = e<sup>(ΔE / T)</sup></div>
+            <p>At high temperatures early in the search, the system willingly explores valleys and crosses low ridges. As the temperature cools down, the algorithm transitions from broad exploration to fine exploitation.</p>
+            <div class="page-number">— 18 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Exploration</span>
+            <h2>Simulated Annealing</h2>
+            <p>Simulated annealing borrows principles from physical metallurgy to overcome local maxima traps in complex state spaces.</p>
+            <ul>
+              <li><strong>Worse-State Acceptance:</strong> Allows temporary suboptimal moves to escape local peaks.</li>
+              <li><strong>Cooling Schedule:</strong> Gradually reducing parameter <em>T</em> stabilizes the system into a global optimum.</li>
+            </ul>
+            <div class="page-number">— 17 —</div>
+          </div>
+        </div>`
+      },
+      // Page 10: Ch.10 Genetic Algorithms
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 10 of 15</span>
+            <span class="topic-label">Genetic algorithms</span>
+            <h2>Population-Based Search — Genetic Algorithms</h2>
+            <p>When configuring complex multi-zone ventilation schedules involving dozens of interdependent variables, individual local search paths are insufficient. <strong>Genetic Algorithms (GAs)</strong> maintain an entire population of candidate solutions.</p>
+            <p>Operating on principles inspired by natural selection, GAs evaluate a fitness function, select superior parent solutions, combine their traits via <strong>crossover</strong>, and introduce random variations through <strong>mutation</strong>. This preserves genetic diversity across the search space.</p>
+            <div class="page-number">— 20 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Evolutionary AI</span>
+            <h2>Genetic Algorithms</h2>
+            <p>Maintaining a population of candidate solutions enables simultaneous parallel exploration across multi-dimensional ventilation parameter spaces.</p>
+            <ul>
+              <li><strong>Fitness Function:</strong> Evaluates the viability and performance score of each candidate.</li>
+              <li><strong>Crossover & Mutation:</strong> Combines successful traits and introduces random mutations to discover novel configurations.</li>
+            </ul>
+            <div class="page-number">— 19 —</div>
+          </div>
+        </div>`
+      },
+      // Page 11: Ch.11 Minimax
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 11 of 15</span>
+            <span class="topic-label">Adversarial search</span>
+            <h2>Adversarial Search — Game Trees and Minimax</h2>
+            <p>Intelligence also requires reasoning about competing agents. Imagine an automated resource-allocation game where our greenhouse management AI (MAX) competes against an unpredictable energy-grid pricing algorithm (MIN).</p>
+            <p>The <strong>Minimax</strong> algorithm constructs a game tree alternating between MAX and MIN nodes. Assuming both players act rationally, MAX selects the move that maximizes the minimum guaranteed outcome against an optimal adversary. Because full game trees grow exponentially, full evaluation is often computationally intractable.</p>
+            <div class="page-number">— 22 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Game Theory</span>
+            <h2>Adversarial Search (Minimax)</h2>
+            <p>In resource-competition scenarios (such as power grid limits during peak hours), the agent plans moves anticipating opposition from the environment.</p>
+            <ul>
+              <li><strong>MAX Node:</strong> Maximizes the system's utility outcome.</li>
+              <li><strong>MIN Node:</strong> Minimizes utility or models market-driven cost inflation.</li>
+            </ul>
+            <div class="page-number">— 21 —</div>
+          </div>
+        </div>`
+      },
+      // Page 12: Ch.12 Alpha-Beta
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 12 of 15</span>
+            <span class="topic-label">Alpha-Beta Pruning</span>
+            <h2>Alpha-Beta Pruning and Depth Limits</h2>
+            <p>To make adversarial search viable in real-time control scenarios, <strong>Alpha-Beta Pruning</strong> is integrated into Minimax. By maintaining bounds (α for MAX's best option, β for MIN's best option), the algorithm safely cuts off branches that cannot influence the final decision.</p>
+            <p>When real-time limits prevent searching to terminal game states, agents employ depth-limited minimax, cutting off the search at depth <em>d</em> and estimating state values using evaluation functions <em>h(s)</em>.</p>
+            <div class="page-number">— 24 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Pruning</span>
+            <h2>Alpha-Beta Pruning</h2>
+            <p>Pruning unpromising game tree branches enables deeper lookahead analysis within tight real-time control constraints.</p>
+            <ul>
+              <li><strong>Alpha (α):</strong> Best (highest) option value found so far for MAX.</li>
+              <li><strong>Beta (β):</strong> Best (lowest) option value found so far for MIN.</li>
+            </ul>
+            <div class="page-number">— 23 —</div>
+          </div>
+        </div>`
+      },
+      // Page 13: Ch.13 MDP
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 13 of 15</span>
+            <span class="topic-label">Markov Decision Processes</span>
+            <h2>Markov Decision Processes (MDPs)</h2>
+            <p>When action outcomes are uncertain and stochastic, single paths and deterministic game trees are replaced by <strong>Markov Decision Processes (MDPs)</strong>. An MDP formalizes sequential decision-making through five core components:</p>
+            <div class="mdp-box">
+              <div>ℳ = (𝒮, 𝒜, 𝒫, ℛ, γ)</div>
+              <div class="desc">
+                • 𝒮: State space<br>
+                • 𝒜: Available actions<br>
+                • 𝒫(s'|s,a): Transition probability model<br>
+                • ℛ(s,a,s'): Immediate rewards/costs<br>
+                • γ: Discount factor [0,1]
+              </div>
+            </div>
+            <div class="page-number">— 26 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Decision Theory</span>
+            <h2>Markov Decision Processes</h2>
+            <p>Modeling stochastic irrigation and heating control loops relies on state-to-state transition probabilities.</p>
+            <ul>
+              <li><strong>Markov Property:</strong> The future depends solely on the current state, independent of past history.</li>
+              <li><strong>Reward Function ℛ:</strong> Incentives for optimal microclimate conditions and penalties for water waste.</li>
+            </ul>
+            <div class="page-number">— 25 —</div>
+          </div>
+        </div>`
+      },
+      // Page 14: Ch.14 Value Iteration
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 14 of 15</span>
+            <span class="topic-label">Value Iteration</span>
+            <h2>Value Iteration and Bellman Optimality</h2>
+            <p>To solve an MDP when models are fully known, agents use <strong>Value Iteration</strong>. Rooted in the <strong>Bellman Optimality Equation</strong>, value iteration recursively updates state values:</p>
+            <div class="formula-box" style="font-size:12px;">V<sub>k+1</sub>(s) = max<sub>a</sub> Σ<sub>s'</sub> 𝒫(s'|s,a) [ ℛ(s,a,s') + γ V<sub>k</sub>(s') ]</div>
+            <p>Through repeated sweeps across the state space, value information propagates backward until estimates stabilize, yielding an optimal policy π(s).</p>
+            <div class="page-number">— 28 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Bellman Equations</span>
+            <h2>Value Iteration</h2>
+            <p>The Bellman equation ties the utility of the current state to the expected utility of future outcomes, discounted by factor γ.</p>
+            <ul>
+              <li><strong>Convergence:</strong> Repeated sweeps guarantee convergence to the optimal state utility function.</li>
+              <li><strong>Optimal Policy π(s):</strong> Selecting actions that maximize expected long-term return.</li>
+            </ul>
+            <div class="page-number">— 27 —</div>
+          </div>
+        </div>`
+      },
+      // Page 15: Ch.15 RL & HMM
+      {
+        front: `<div class="page-face page-front"><div class="paper-texture"></div>
+          <div class="page-content">
+            <span class="chapter-label">Chapter 15 of 15</span>
+            <span class="topic-label">Conclusion and RL</span>
+            <h2>Reinforcement Learning & Hidden Markov Models</h2>
+            <p>When transition and reward models are unknown, the system shifts from planning to <strong>Reinforcement Learning (RL)</strong>. Using Q-learning, an agent interacts with the greenhouse environment through trial and error via temporal-difference error.</p>
+            <p>Finally, what happens when sensors are noisy and true internal states are hidden? <strong>Hidden Markov Models (HMMs)</strong> combine transition probabilities with emission likelihoods through filtering, ensuring absolute clarity beneath Astana's freezing winter skies.</p>
+            <div class="end-box">
+              <h4>🏁 The book is complete!</h4>
+              <p>You have successfully completed all 15 sections of our interactive project on artificial intelligence.</p>
+            </div>
+            <div class="page-number">— 30 —</div>
+          </div>
+        </div>`,
+        back: `<div class="page-face page-back"><div class="paper-texture"></div>
+          <div class="page-content" style="display:flex; flex-direction:column; justify-content:center; text-align:center; height:100%;">
+            <div>
+              <p style="font-size:35px; margin-bottom:12px;">🌿</p>
+              <p style="font-family:'Merriweather',serif; font-size:12px; color:#555; font-weight:700;">Project Summary</p>
+              <p style="font-size:11px; color:#666; line-height:1.6; margin-top:8px;">Intelligent agents combine classical search, logic, and probability theory to build robust autonomous management systems across harsh climates.</p>
+              <p style="font-size:10px; color:#aaa; margin-top:20px;">Arsen Nagmet & Daryn Bolatov<br>Astana, 2026</p>
+            </div>
+            <div class="page-number">— 29 —</div>
+          </div>
+        </div>`
+      }
+    ];
+
+    // ── Build pages ──
+    const book = document.getElementById('book');
+    const totalPages = pagesData.length; // 16 (cover + 15 chapters)
+    let currentPage = 0;
+    let isAnimating = false;
+
+    pagesData.forEach((data, i) => {
+      const pageEl = document.createElement('div');
+      pageEl.className = 'page';
+      pageEl.id = 'leaf-' + i;
+      pageEl.style.zIndex = totalPages - i;
+      pageEl.innerHTML = data.front + data.back;
+
+      // Click to flip
+      pageEl.addEventListener('click', (e) => {
+        if (isAnimating) return;
+        if (!pageEl.classList.contains('flipped') && i === currentPage) {
+          nextPage();
+        }
+      });
+
+      book.appendChild(pageEl);
+    });
+
+    function updateZIndices() {
+      const leaves = document.querySelectorAll('.page');
+      leaves.forEach((leaf, i) => {
+        if (i < currentPage) {
+          leaf.style.zIndex = i + 1;
+        } else {
+          leaf.style.zIndex = totalPages - i;
+        }
+      });
+    }
+
+    function updateControls() {
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const indicator = document.getElementById('pageIndicator');
+
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = currentPage >= totalPages;
+
+      if (currentPage === 0) {
+        indicator.textContent = 'Cover';
+      } else if (currentPage >= totalPages) {
+        indicator.textContent = 'End of Book';
+      } else {
+        indicator.textContent = `Chapter ${currentPage} of 15`;
+      }
+    }
+
+    function nextPage() {
+      if (currentPage >= totalPages || isAnimating) return;
+      isAnimating = true;
+      const leaf = document.getElementById('leaf-' + currentPage);
+      leaf.classList.add('flipped');
+      currentPage++;
+      updateZIndices();
+      updateControls();
+      setTimeout(() => { isAnimating = false; }, 800);
+    }
+
+    function prevPage() {
+      if (currentPage <= 0 || isAnimating) return;
+      isAnimating = true;
+      currentPage--;
+      const leaf = document.getElementById('leaf-' + currentPage);
+      leaf.classList.remove('flipped');
+      updateZIndices();
+      updateControls();
+      setTimeout(() => { isAnimating = false; }, 800);
+    }
+
+    function goToPage(targetPage) {
+      if (isAnimating) return;
+      if (targetPage > currentPage) {
+        const flipForward = () => {
+          if (currentPage < targetPage) {
+            const leaf = document.getElementById('leaf-' + currentPage);
+            leaf.style.transition = 'transform 0.3s ease';
+            leaf.classList.add('flipped');
+            currentPage++;
+            updateZIndices();
+            updateControls();
+            setTimeout(flipForward, 150);
+          } else {
+            document.querySelectorAll('.page').forEach(p => {
+              p.style.transition = 'transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1.000)';
+            });
+          }
+        };
+        flipForward();
+      } else if (targetPage < currentPage) {
+        const flipBack = () => {
+          if (currentPage > targetPage) {
+            currentPage--;
+            const leaf = document.getElementById('leaf-' + currentPage);
+            leaf.style.transition = 'transform 0.3s ease';
+            leaf.classList.remove('flipped');
+            updateZIndices();
+            updateControls();
+            setTimeout(flipBack, 150);
+          } else {
+            document.querySelectorAll('.page').forEach(p => {
+              p.style.transition = 'transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1.000)';
+            });
+          }
+        };
+        flipBack();
+      }
+    }
+
+    // ── Keyboard navigation ──
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextPage(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prevPage(); }
+    });
+
+    updateControls();
+  </script>
+</body>
+</html>
